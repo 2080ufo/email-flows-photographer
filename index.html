@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email-флоу для фотографа беременности</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #f093fb, #f5576c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #888;
+            margin-bottom: 40px;
+            font-size: 1.1rem;
+        }
+        
+        .tabs {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        
+        .tab {
+            padding: 15px 30px;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .tab:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .tab.active {
+            background: linear-gradient(90deg, #f093fb, #f5576c);
+        }
+        
+        .flow-container {
+            display: none;
+        }
+        
+        .flow-container.active {
+            display: block;
+        }
+        
+        .flow-title {
+            text-align: center;
+            font-size: 1.8rem;
+            margin-bottom: 30px;
+        }
+        
+        .flow-diagram {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 50px;
+        }
+        
+        .flow-start {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            padding: 20px 40px;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            text-align: center;
+            max-width: 600px;
+        }
+        
+        .arrow {
+            width: 3px;
+            height: 40px;
+            background: linear-gradient(to bottom, #667eea, #f5576c);
+            position: relative;
+        }
+        
+        .arrow::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-top: 12px solid #f5576c;
+        }
+        
+        .email-card {
+            background: rgba(255,255,255,0.08);
+            border-radius: 15px;
+            padding: 25px;
+            width: 100%;
+            max-width: 500px;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .email-card:hover {
+            background: rgba(255,255,255,0.12);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        .email-number {
+            background: linear-gradient(90deg, #f093fb, #f5576c);
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .email-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .email-timing {
+            color: #888;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+        
+        .email-goal {
+            color: #a0a0a0;
+            font-size: 0.9rem;
+        }
+        
+        .branch {
+            display: flex;
+            gap: 30px;
+            align-items: flex-start;
+        }
+        
+        .branch-line {
+            width: 100px;
+            height: 3px;
+            background: linear-gradient(to right, #667eea, #f5576c);
+            margin-top: 60px;
+        }
+        
+        .variants-section {
+            margin-top: 60px;
+            padding-top: 40px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .variants-title {
+            text-align: center;
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+        }
+        
+        .email-selector {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+        
+        .email-btn {
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .email-btn:hover, .email-btn.active {
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-color: transparent;
+        }
+        
+        .variants-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+        }
+        
+        .variant-card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .variant-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .variant-number {
+            background: #667eea;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+        }
+        
+        .variant-type {
+            color: #888;
+            font-size: 0.85rem;
+        }
+        
+        .variant-subject {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #f5576c;
+        }
+        
+        .variant-preview {
+            color: #a0a0a0;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        
+        .metrics-section {
+            margin-top: 60px;
+            padding: 30px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+        }
+        
+        .metrics-title {
+            text-align: center;
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+        }
+        
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        
+        .metric-card {
+            background: rgba(255,255,255,0.08);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .metric-value {
+            font-size: 2rem;
+            font-weight: bold;
+            background: linear-gradient(90deg, #667eea, #f5576c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .metric-label {
+            color: #888;
+            margin-top: 5px;
+        }
+        
+        .download-section {
+            margin-top: 40px;
+            text-align: center;
+        }
+        
+        .download-btn {
+            display: inline-block;
+            padding: 15px 40px;
+            background: linear-gradient(90deg, #f093fb, #f5576c);
+            border-radius: 30px;
+            color: #fff;
+            text-decoration: none;
+            font-weight: 600;
+            margin: 10px;
+            transition: all 0.3s;
+        }
+        
+        .download-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(240, 147, 251, 0.3);
+        }
+        
+        .schedule-table {
+            width: 100%;
+            margin-top: 40px;
+            border-collapse: collapse;
+        }
+        
+        .schedule-table th,
+        .schedule-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .schedule-table th {
+            background: rgba(255,255,255,0.1);
+            font-weight: 600;
+        }
+        
+        .schedule-table tr:hover {
+            background: rgba(255,255,255,0.05);
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .tabs {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .tab {
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            .variants-list {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📧 Email-флоу для фотографа</h1>
+        <p class="subtitle">Полная система email-маркетинга для фотографа беременности и материнства</p>
+        
+        <div class="tabs">
+            <button class="tab active" onclick="showFlow('buyers')">👶 Купившие клиентки</button>
+            <button class="tab" onclick="showFlow('nonbuyers')">🤔 Не купившие (лиды)</button>
+        </div>
+        
+        <!-- BUYERS FLOW -->
+        <div id="buyers" class="flow-container active">
+            <h2 class="flow-title">Флоу для клиенток после фотосессии беременности</h2>
+            
+            <div class="flow-diagram">
+                <div class="flow-start">🤰 Клиентка прошла фотосессию беременности</div>
+                <div class="arrow"></div>
+                
+                <div class="email-card" onclick="showVariants('buyers', 1)">
+                    <div class="email-number">1</div>
+                    <div class="email-title">📸 Галерея готова</div>
+                    <div class="email-timing">⏰ Через 3-7 дней после съёмки</div>
+                    <div class="email-goal">🎯 Доставка фото, эмоциональный пик</div>
+                </div>
+                <div class="arrow"></div>
+                
+                <div class="email-card" onclick="showVariants('buyers', 2)">
+                    <div class="email-number">2</div>
+                    <div class="email-title">📦 Продажа альбомов и коробок</div>
+                    <div class="email-timing">⏰ +2-3 дня</div>
+                    <div class="email-goal">🎯 Upsell физических продуктов</div>
+                </div>
+                <div class="arrow"></div>
+                
+                <div class="email-card" onclick="showVariants('buyers', 3)">
+                    <div class="email-number">3</div>
+                    <div class="email-title">💬 Напоминание + отзыв</div>
+                    <div class="email-timing">⏰ +4-5 дней (если не купила)</div>
+                    <div class="email-goal">🎯 Дожим с социальным доказательством</div>
+                </div>
+                <div class="arrow"></div>
+                
+                <div class="email-card" onclick="showVariants('buyers', 4)">
+                    <div class="email-number">4</div>
+                    <div class="email-title">👶 Newborn съёмка</div>
+                    <div class="email-timing">⏰ За 3-4 недели до ПДР</div>
+                    <div class="email-goal">🎯 Бронирование съёмки новорождённого</div>
+                </div>
+                <div class="arrow"></div>
+                
+                <div class="email-card" onclick="showVariants('buyers', 5)">
+                    <div class="email-number">5</div>
+                    <div class="email-title">🎉 Поздравление</div>
+                    <div class="email-timing">⏰ После родов</div>
+                    <div class="email-goal">🎯 Поддержка связи</div>
+                </div>
+                <div class="arrow"></div>
+                
+                <div class="email-card" onclick="showVariants('buyers', 6)">
+                    <div class="email-number">6</div>
+                    <div class="email-title">👶 Съёмка 6 месяцев</div>
+                    <div class="email-timing">⏰ Когда малышу ~5 месяцев</div>
+                    <div class="email-goal">🎯 Продажа съёмки</div>
+                </div>
+                <div class="arrow"></div>
+                
+                <div class="email-card" onclick="showVariants('buyers', 7)">
+                    <div class="email-number">7</div>
+                    <div class="email-title">🎂 Съёмка на годик</div>
+                    <div class="email-timing">⏰ За 4-6 недель до ДР</div>
+                    <div class="email-goal">🎯 Cake Smash / Первый год</div>
+                </div>
+                <div class="arrow"></div>
+                
+                <div class="email-card" onclick="showVariants('buyers', 8)">
+                    <div class="email-number">8</div>
+                    <div class="email-title">👨‍👩‍👧 Семейная съёмка</div>
+                    <div class="email-timing">⏰ После годика / сезон</div>
+                    <div class="email-goal">🎯 Перевод в семейных клиентов</div>
+                </div>
+            </div>
+            
+            <div class="metrics-section">
+                <h3 class="metrics-title">📊 Целевые метрики</h3>
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-value">>50%</div>
+                        <div class="metric-label">Open Rate</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">>15%</div>
+                        <div class="metric-label">Click Rate</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">>25%</div>
+                        <div class="metric-label">Conversion (альбомы)</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">>20%</div>
+                        <div class="metric-label">Booking Rate</div>
+                    </div>
+                </div>
+            </div>
+            
+            <table class="schedule-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Письмо</th>
+                        <th>Когда</th>
+                        <th>Цель</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>Галерея готова</td>
+                        <td>+3-7 дней после съёмки</td>
+                        <td>Доставка, эмоции</td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>Продажа альбомов</td>
+                        <td>+2-3 дня после #1</td>
+                        <td>Upsell</td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>Напоминание + отзыв</td>
+                        <td>+4-5 дней (если не купила)</td>
+                        <td>Дожим</td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td>Newborn</td>
+                        <td>За 3-4 недели до ПДР</td>
+                        <td>Бронирование</td>
+                    </tr>
+                    <tr>
+                        <td>5</td>
+                        <td>Поздравление</td>
+                        <td>После родов</td>
+                        <td>Связь</td>
+                    </tr>
+                    <tr>
+                        <td>6</td>
+                        <td>6 месяцев</td>
+                        <td>~5 мес малышу</td>
+                        <td>Продажа</td>
+                    </tr>
+                    <tr>
+                        <td>7</td>
+                        <td>Годик</td>
+                        <td>За 4-6 недель до ДР</td>
+                        <td>Продажа</td>
+                    </tr>
+                    <tr>
+                        <td>8</td>
+                        <td>Семейная</td>
+                        <td>После годика</td>
+                        <td>LTV</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- NON-BUYERS FLOW -->
+        <div id="nonbuyers" class="flow-container">
+            <h2 class="flow-title">Флоу для лидов, которые не забронировали</h2>
+            
+            <div class="flow-diagram">
+                <div class="flow-start">🤔 Лид оставил заявку / написал / скачал прайс, но НЕ забронировал</div>
+                <div class="arrow"></div>
+                
+                <div class="email-card" onclick="showVariants('nonbuyers', 1)">
+                    <div class="email-number">1</div>
+                    <div class="email-title">👋 Быстрый ответ</div>
+                    <div class="email-timing">⏰ В течение 1 часа</div>
+                    <div class="email-goal">🎯 Установить контакт</div>
+                </div>
+                <div class="arrow"></div>
+                
+                <div class="email-card" onclick="showVariants('nonbuyers', 2)">
+                    <div class="email-number">2</div>
+                    <div class="email-title">📚 Ценность + FAQ</div>
+                    <div class="email-timing">⏰ +2 дня</div>
+                    <div class="email-goal">🎯 Дать ценность, снять возражения</div>
+                </div>
+                <div class="arrow"></div>
+                
+                <div class="email-card" onclick="showVariants('nonbuyers', 3)">
+                    <div class="email-number">3</div>
+                    <div class="email-title">⭐ Социальное доказательство</div>
+                    <div class="email-timing">⏰ +3-4 дня</div>
+                    <div class="email-goal">🎯 Показать результаты других</div>
+                </div>
+                <div class="arrow"></div>
+                
+                <div class="email-card" onclick="showVariants('nonbuyers', 4)">
+                    <div class="email-number">4</div>
+                    <div class="email-title">🛡️ Работа с возражениями</div>
+                    <div class="email-timing">⏰ +4-5 дней</div>
+                    <div class="email-goal">🎯 Снять барьеры</div>
+                </div>
+                <div class="arrow"></div>
+                
+                <div class="email-card" onclick="showVariants('nonbuyers', 5)">
+                    <div class="email-number">5</div>
+                    <div class="email-title">🎁 Мягкое предложение</div>
+                    <div class="email-timing">⏰ +5-7 дней</div>
+                    <div class="email-goal">🎯 Конверсия</div>
+                </div>
+                <div class="arrow"></div>
+                
+                <div class="email-card" onclick="showVariants('nonbuyers', 6)">
+                    <div class="email-number">6</div>
+                    <div class="email-title">⏰ Последний шанс</div>
+                    <div class="email-timing">⏰ +7 дней</div>
+                    <div class="email-goal">🎯 Финальная попытка</div>
+                </div>
+                <div class="arrow"></div>
+                
+                <div class="email-card" onclick="showVariants('nonbuyers', 7)">
+                    <div class="email-number">7</div>
+                    <div class="email-title">🔄 Долгий nurture</div>
+                    <div class="email-timing">⏰ 1 раз в месяц</div>
+                    <div class="email-goal">🎯 Оставаться в памяти</div>
+                </div>
+            </div>
+            
+            <div class="metrics-section">
+                <h3 class="metrics-title">📊 Целевые метрики</h3>
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-value">>40%</div>
+                        <div class="metric-label">Open Rate</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">>10%</div>
+                        <div class="metric-label">Click Rate</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">>10%</div>
+                        <div class="metric-label">Reply Rate</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">>8%</div>
+                        <div class="metric-label">Conversion Rate</div>
+                    </div>
+                </div>
+            </div>
+            
+            <table class="schedule-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Письмо</th>
+                        <th>Когда</th>
+                        <th>Цель</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>Быстрый ответ</td>
+                        <td>&lt;1 часа</td>
+                        <td>Контакт</td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>Ценность + FAQ</td>
+                        <td>+2 дня</td>
+                        <td>Доверие</td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>Социальное доказательство</td>
+                        <td>+3-4 дня</td>
+                        <td>Желание</td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td>Работа с возражениями</td>
+                        <td>+4-5 дней</td>
+                        <td>Снять барьеры</td>
+                    </tr>
+                    <tr>
+                        <td>5</td>
+                        <td>Мягкое предложение</td>
+                        <td>+5-7 дней</td>
+                        <td>Конверсия</td>
+                    </tr>
+                    <tr>
+                        <td>6</td>
+                        <td>Последний шанс</td>
+                        <td>+7 дней</td>
+                        <td>Финал</td>
+                    </tr>
+                    <tr>
+                        <td>7</td>
+                        <td>Долгий nurture</td>
+                        <td>1 раз/месяц</td>
+                        <td>Поддержка</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="download-section">
+            <h3 style="margin-bottom: 20px;">📥 Скачать полные тексты писем</h3>
+            <a href="BUYERS-FLOW.md" download class="download-btn">📄 Флоу для купивших (40 текстов)</a>
+            <a href="NON-BUYERS-FLOW.md" download class="download-btn">📄 Флоу для НЕкупивших (35 текстов)</a>
+        </div>
+        
+        <footer style="text-align: center; margin-top: 60px; padding: 20px; color: #666;">
+            <p>Создано с 💕 для фотографа беременности и материнства</p>
+            <p style="margin-top: 10px;">75 готовых текстов писем • 2 воронки • Полная система email-маркетинга</p>
+        </footer>
+    </div>
+    
+    <script>
+        function showFlow(flowId) {
+            // Hide all flows
+            document.querySelectorAll('.flow-container').forEach(el => {
+                el.classList.remove('active');
+            });
+            
+            // Deactivate all tabs
+            document.querySelectorAll('.tab').forEach(el => {
+                el.classList.remove('active');
+            });
+            
+            // Show selected flow
+            document.getElementById(flowId).classList.add('active');
+            
+            // Activate corresponding tab
+            event.target.classList.add('active');
+        }
+        
+        function showVariants(flow, emailNum) {
+            // Could expand to show variants in a modal
+            alert('📧 Письмо #' + emailNum + '\n\nСкачайте полный документ, чтобы увидеть все 5 вариантов текста для этого письма!');
+        }
+    </script>
+</body>
+</html>
